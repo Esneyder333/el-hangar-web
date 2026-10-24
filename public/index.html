@@ -1,0 +1,437 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Hangar - Inventario</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+        }
+
+        header {
+            background: #1b1b1b;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 3px solid #f3af1a;
+        }
+
+        header h1, h2 {
+            color: #f3af1a;
+        }
+
+        nav {
+            background: #242424;
+            padding: 15px;
+            text-align: center;
+        }
+
+        nav a {
+            color: #f3af1a;
+            text-decoration: none;
+            margin: 0 12px;
+            font-weight: bold;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .panel {
+            background: #1d1d1d;
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 25px;
+        }
+
+        button {
+    background: #f3af1a;
+    color: #111;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    margin: 3px;
+}
+
+button:hover {
+    background: #ffd166;
+    transform: translateY(-2px);
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    background: #292929;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 6px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #f3af1a;
+    box-shadow: 0 0 5px #f3af1a;
+}
+
+label {
+    color: #ddd;
+    font-weight: bold;
+}
+
+table tbody tr:hover {
+    background: #292929;
+}
+
+.panel {
+    background: #1d1d1d;
+    border: 1px solid #444;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+       th, td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #444;
+    text-align: left;
+    white-space: nowrap;
+}
+
+th {
+    color: #f3af1a;
+    background: #242424;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+td {
+    color: #eee;
+}
+
+.tabla-contenedor {
+    overflow-x: auto;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0;
+}
+
+        th {
+            color: #f3af1a;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        #mensaje {
+            margin-top: 15px;
+        }
+
+        footer {
+            text-align: center;
+            color: #aaa;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>EL HANGAR</h1>
+        <p>Donde despega el sabor</p>
+    </header>
+
+    <nav>
+        <a href="/">Inicio</a>
+        <a href="#inventario">Inventario</a>
+    </nav>
+
+    <main>
+        <section class="panel" id="inventario">
+            <h2>Centro de Mando - Inventario</h2>
+            <p>Consulta los productos registrados en la bodega.</p>
+
+            <button onclick="cargarProductos()">Actualizar inventario</button>
+            
+<h3>Registrar nuevo producto</h3>
+
+<form id="formProducto">
+    <p>
+        <label for="nombre">Nombre del producto</label><br>
+        <input type="text" id="nombre" name="nombre" required>
+    </p>
+
+    <p>
+        <label for="marca">Marca</label><br>
+        <input type="text" id="marca" name="marca" required>
+    </p>
+
+    <p>
+        <label for="tipo">Tipo de producto</label><br>
+        <input type="text" id="tipo" name="tipo" required>
+    </p>
+
+    <p>
+        <label for="precio">Precio</label><br>
+        <input type="number" id="precio" name="precio" min="0" step="0.01" required>
+    </p>
+
+    <p>
+        <label for="existencia">Existencia</label><br>
+        <input type="number" id="existencia" name="existencia" min="0" step="1" required>
+    </p>
+
+    <button type="submit">Guardar producto</button>
+</form>
+
+<p id="mensajeFormulario"></p>
+
+
+            <p id="mensaje">Cargando productos...</p>
+<p>
+    <label for="buscarProducto">Buscar producto</label><br>
+    <input
+        type="text"
+        id="buscarProducto"
+        placeholder="Escribe el nombre o la marca..."
+    >
+</p>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Producto</th>
+                            <th>Marca</th>
+                            <th>Tipo</th>
+                            <th>Precio</th>
+                            <th>Existencia</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaProductos"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>El Hangar - Centro de Mando</p>
+    </footer>
+
+    <script>
+        async function cargarProductos() {
+            const mensaje = document.getElementById('mensaje');
+            const lista = document.getElementById('listaProductos');
+
+            mensaje.textContent = 'Cargando productos...';
+            lista.innerHTML = '';
+
+            try {
+                const respuesta = await fetch('/api/productos');
+
+                if (!respuesta.ok) {
+                    throw new Error('No se pudieron consultar los productos');
+                }
+
+                const productos = await respuesta.json();
+                const busqueda = document.getElementById('buscarProducto').value
+    .trim()
+    .toLowerCase();
+
+const productosFiltrados = productos.filter(producto =>
+    producto.nombre.toLowerCase().includes(busqueda) ||
+    producto.marca.toLowerCase().includes(busqueda)
+);
+
+                productosFiltrados.forEach(producto => {
+                    const fila = document.createElement('tr');
+
+                    
+
+fila.innerHTML = `
+    <td>${producto.id_producto}</td>
+    <td>${producto.nombre}</td>
+    <td>${producto.marca}</td>
+    <td>${producto.tipo}</td>
+    <td>$${Number(producto.precio).toLocaleString('es-CO')}</td>
+    <td>${producto.existencia}</td>
+    <td>
+        <button onclick="editarProducto(${producto.id_producto})">
+            Editar
+        </button>
+        <button onclick="eliminarProducto(${producto.id_producto})">
+            Eliminar
+        </button>
+    </td>
+`;
+
+                    lista.appendChild(fila);
+                });
+
+                mensaje.textContent = productos.length
+                    ? 'Productos registrados: ' + productos.length
+                    : 'No hay productos registrados.';
+            } catch (error) {
+                mensaje.textContent = 'Error al cargar el inventario. Revisa el servidor.';
+            }
+        }
+
+        cargarProductos();
+        
+document.getElementById('formProducto').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const formulario = event.target;
+    const datos = {
+        nombre: formulario.nombre.value.trim(),
+        marca: formulario.marca.value.trim(),
+        tipo: formulario.tipo.value.trim(),
+        precio: formulario.precio.value,
+        existencia: formulario.existencia.value
+    };
+
+    const mensaje = document.getElementById('mensajeFormulario');
+
+    try {
+        const respuesta = await fetch('/api/productos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datos)
+        });
+
+        const resultado = await respuesta.json();
+
+        if (!respuesta.ok) {
+            throw new Error(resultado.error || 'No se pudo guardar el producto');
+        }
+
+        mensaje.textContent = 'Producto guardado correctamente.';
+        formulario.reset();
+        cargarProductos();
+    } catch (error) {
+        mensaje.textContent = 'Error: ' + error.message;
+    }
+});
+
+async function eliminarProducto(id) {
+    const confirmar = confirm('¿Seguro que deseas eliminar este producto?');
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+        const respuesta = await fetch('/api/productos/' + id, {
+            method: 'DELETE'
+        });
+
+        const resultado = await respuesta.json();
+        document.getElementById('totalProductos').textContent =
+    'Total de productos: ' + productos.length;
+
+        if (!respuesta.ok) {
+            throw new Error(resultado.error || 'No se pudo eliminar el producto');
+        }
+
+        document.getElementById('mensaje').textContent =
+            'Producto eliminado correctamente.';
+
+        cargarProductos();
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+async function editarProducto(id) {
+    try {
+        const respuesta = await fetch('/api/productos');
+        const productos = await respuesta.json();
+
+        if (!respuesta.ok) {
+            throw new Error('No se pudieron consultar los productos');
+        }
+
+        const producto = productos.find(p => p.id_producto === id);
+
+        if (!producto) {
+            alert('No se encontró el producto');
+            return;
+        }
+
+        const nombre = prompt('Nombre del producto:', producto.nombre);
+        if (nombre === null) return;
+
+        const marca = prompt('Marca:', producto.marca);
+        if (marca === null) return;
+
+        const tipo = prompt('Tipo:', producto.tipo);
+        if (tipo === null) return;
+
+        const precio = prompt('Precio:', producto.precio);
+        if (precio === null) return;
+
+        const existencia = prompt('Existencia:', producto.existencia);
+        if (existencia === null) return;
+
+        const respuestaEditar = await fetch('/api/productos/' + id, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nombre,
+                marca,
+                tipo,
+                precio,
+                existencia
+            })
+        });
+
+        const resultado = await respuestaEditar.json();
+
+        if (!respuestaEditar.ok) {
+            throw new Error(resultado.error || 'No se pudo editar el producto');
+        }
+
+        document.getElementById('mensaje').textContent =
+            'Producto actualizado correctamente.';
+
+        cargarProductos();
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+document.getElementById('buscarProducto').addEventListener('input', function() {
+    cargarProductos();
+});
+    </script>
+</body>
+</html>
